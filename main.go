@@ -8,9 +8,11 @@ import (
 	"image/draw"
 	"image/png"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"io/ioutil"
 
@@ -92,6 +94,15 @@ func getImage(overlayText string) (*bytes.Buffer, error) {
 func imageHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	days := vars["days"]
+	date := vars["date"]
+
+	if date != "" {
+		timeFormat := "2006-01-02"
+		t, _ := time.Parse(timeFormat, date)
+		duration := time.Now().Sub(t)
+		days = strconv.Itoa(int(math.Floor((duration.Hours() / 24) + 0.5)))
+	}
+
 	buffer, err := getImage(days)
 	if err != nil {
 		log.Printf("Error getting image: %#v\n", err)
@@ -107,6 +118,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{days:[0-9]{1,3}}", imageHandler)
+	r.HandleFunc("/{date:\\d{4}\\-\\d{2}\\-\\d{2}}", imageHandler)
 	http.Handle("/", r)
 
 	log.Printf("Listening on http://0.0.0.0:%v...\n", os.Getenv("PORT"))
