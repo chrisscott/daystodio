@@ -117,7 +117,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{days:[0-9]{1,3}}", imageHandler)
+	r.HandleFunc("/{days:[0-9]{1,4}}", imageHandler)
 	r.HandleFunc("/{date:\\d{4}\\-\\d{2}\\-\\d{2}}", imageHandler)
 	http.Handle("/", r)
 
