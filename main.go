@@ -80,7 +80,7 @@ func getImage(overlayText string) (*bytes.Buffer, error) {
 	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(m, m.Bounds(), src, b.Min, draw.Src)
 
-	getOverlay(m, 345, overlayText, "./luximr.ttf", 144)
+	getOverlay(m, 345, overlayText, "./luximr.ttf", 126)
 
 	buffer := new(bytes.Buffer)
 	if err := png.Encode(buffer, m); err != nil {
