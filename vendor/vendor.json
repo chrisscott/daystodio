@@ -39,8 +39,20 @@
 			"revisionTime": "2016-05-02T17:56:24Z"
 		},
 		{
+			"checksumSHA1": "7E3Y1HU/UbsQF/dxMRdjFmx9QDQ=",
+			"path": "golang.org/x/image/draw",
+			"revision": "5286ed5c2aec7fc7d08323e7e4423b171caf84cb",
+			"revisionTime": "2016-11-27T09:19:50Z"
+		},
+		{
 			"checksumSHA1": "ZG6tBwXNShvXeDlqXHQ+5z8JxZw=",
 			"path": "golang.org/x/image/font",
+			"revision": "5286ed5c2aec7fc7d08323e7e4423b171caf84cb",
+			"revisionTime": "2016-11-27T09:19:50Z"
+		},
+		{
+			"checksumSHA1": "o7VkCGBiKM5HXzVzrIci1YDlpvc=",
+			"path": "golang.org/x/image/math/f64",
 			"revision": "5286ed5c2aec7fc7d08323e7e4423b171caf84cb",
 			"revisionTime": "2016-11-27T09:19:50Z"
 		},
