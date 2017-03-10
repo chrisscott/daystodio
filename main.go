@@ -5,11 +5,11 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/draw"
 	"image/png"
 	"log"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -20,6 +20,7 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 )
 
@@ -62,7 +63,7 @@ func getOverlay(img *image.RGBA, y int, label string, fontFile string, fontSizeP
 	c.DrawString(label, pt)
 }
 
-func getImage(overlayText string) (*bytes.Buffer, error) {
+func getImage(overlayText string, width int) (*bytes.Buffer, error) {
 
 	f, err := os.Open("images/src/dio.png")
 	if err != nil {
@@ -82,6 +83,13 @@ func getImage(overlayText string) (*bytes.Buffer, error) {
 
 	getOverlay(m, 345, overlayText, "./luximr.ttf", 126)
 
+	if width > 0 && width < b.Dx() {
+		scaleFactor := float32(width) / float32(b.Dx())
+		dst := image.NewRGBA(image.Rect(0, 0, int(float32(b.Dx())*scaleFactor), int(float32(b.Dy())*scaleFactor)))
+		draw.CatmullRom.Scale(dst, dst.Bounds(), m, b, draw.Over, nil)
+		m = dst
+	}
+
 	buffer := new(bytes.Buffer)
 	if err := png.Encode(buffer, m); err != nil {
 		log.Printf("Error encoding resulting PNG: %#v\n", err)
@@ -92,6 +100,7 @@ func getImage(overlayText string) (*bytes.Buffer, error) {
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
+	width := 0
 	vars := mux.Vars(r)
 	days := vars["days"]
 	date := vars["date"]
@@ -103,7 +112,14 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 		days = strconv.Itoa(int(math.Floor((duration.Hours() / 24) + 0.5)))
 	}
 
-	buffer, err := getImage(days)
+	if qs := r.URL.RawQuery; qs != "" {
+		qmap, _ := url.ParseQuery(qs)
+		if len(qmap["w"]) > 0 {
+			width, _ = strconv.Atoi(qmap["w"][0])
+		}
+	}
+
+	buffer, err := getImage(days, width)
 	if err != nil {
 		log.Printf("Error getting image: %#v\n", err)
 	}
