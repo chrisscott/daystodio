@@ -1,0 +1,24 @@
+# Days to DIO
+This is a simple--yet rocking--web service to have Ronnie James tell you how many days it took to DIO, given a date or number of days.
+
+## Interacting with the service
+
+You must pass in at least a number of days or a date (YYY-MM-DD format). e.g.
+
+```
+http://daystod.io/123
+http://daystod.io/2017-12-01
+```
+
+To scale based on width, pass it in on the querystring:
+```
+http://daystod.io/123?w=250
+```
+
+## Running
+This is built to run on a heroku buildpack for production. It should just work...
+
+To run a local instance for testing:
+```
+export PORT=3000; go run main.go
+```
