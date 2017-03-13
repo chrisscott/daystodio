@@ -5,7 +5,7 @@ This is a simple--yet rocking--web service to have Ronnie James tell you how man
 
 ## Interacting with the service
 
-You must pass in at least a number of days or a date (YYY-MM-DD format). e.g.
+You must pass in at least a number of days or a date (YYYY-MM-DD format). e.g.
 
 ```
 http://daystod.io/123
