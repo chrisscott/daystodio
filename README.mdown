@@ -1,6 +1,8 @@
 # Days to DIO
 This is a simple--yet rocking--web service to have Ronnie James tell you how many days it took to DIO, given a date or number of days.
 
+<img src="http://daystod.io/42?w=250">
+
 ## Interacting with the service
 
 You must pass in at least a number of days or a date (YYY-MM-DD format). e.g.
