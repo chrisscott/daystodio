@@ -24,7 +24,8 @@ import (
 	"golang.org/x/image/font"
 )
 
-func getOverlay(img *image.RGBA, y int, label string, fontFile string, fontSizePt float64) {
+func addOverlay(img *image.RGBA, y int, label string, fontFile string, fontSizePt float64) {
+	// get and parse the font
 	fontBytes, err := ioutil.ReadFile(fontFile)
 	if err != nil {
 		log.Printf("Error reading font: %#v\n", err)
@@ -36,6 +37,7 @@ func getOverlay(img *image.RGBA, y int, label string, fontFile string, fontSizeP
 		return
 	}
 
+	// font setup
 	c := freetype.NewContext()
 	c.SetDPI(72)
 	c.SetFont(f)
@@ -50,6 +52,7 @@ func getOverlay(img *image.RGBA, y int, label string, fontFile string, fontSizeP
 	face := truetype.NewFace(f, &opts)
 	var totalWidth int
 
+	// add the text as glyphs so we can center them over the image
 	for _, x := range label {
 		awidth, ok := face.GlyphAdvance(rune(x))
 		if ok != true {
@@ -63,9 +66,8 @@ func getOverlay(img *image.RGBA, y int, label string, fontFile string, fontSizeP
 	c.DrawString(label, pt)
 }
 
-func getImage(overlayText string, width int) (*bytes.Buffer, error) {
-
-	f, err := os.Open("images/src/dio.png")
+func getImageBuffer(overlayText string, width int) (*bytes.Buffer, error) {
+	f, err := os.Open("src/images/dio.png")
 	if err != nil {
 		log.Printf("Error opening source image: %#v\n", err)
 		return nil, err
@@ -81,8 +83,9 @@ func getImage(overlayText string, width int) (*bytes.Buffer, error) {
 	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(m, m.Bounds(), src, b.Min, draw.Src)
 
-	getOverlay(m, 345, overlayText, "./luximr.ttf", 126)
+	addOverlay(m, 345, overlayText, "src/fonts/luximr.ttf", 126)
 
+	// scale down if needed
 	if width > 0 && width < b.Dx() {
 		scaleFactor := float32(width) / float32(b.Dx())
 		dst := image.NewRGBA(image.Rect(0, 0, int(float32(b.Dx())*scaleFactor), int(float32(b.Dy())*scaleFactor)))
@@ -90,6 +93,7 @@ func getImage(overlayText string, width int) (*bytes.Buffer, error) {
 		m = dst
 	}
 
+	// encode as a png
 	buffer := new(bytes.Buffer)
 	if err := png.Encode(buffer, m); err != nil {
 		log.Printf("Error encoding resulting PNG: %#v\n", err)
@@ -105,6 +109,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	days := vars["days"]
 	date := vars["date"]
 
+	// get the number of days since the date passed in
 	if date != "" {
 		timeFormat := "2006-01-02"
 		t, _ := time.Parse(timeFormat, date)
@@ -112,6 +117,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 		days = strconv.Itoa(int(math.Floor((duration.Hours() / 24) + 0.5)))
 	}
 
+	// handle width parameter
 	if qs := r.URL.RawQuery; qs != "" {
 		qmap, _ := url.ParseQuery(qs)
 		if len(qmap["w"]) > 0 {
@@ -119,11 +125,16 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	buffer, err := getImage(days, width)
+	// get a byte buffer of our image with the overlay
+	buffer, err := getImageBuffer(days, width)
 	if err != nil {
 		log.Printf("Error getting image: %#v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Uhoh"))
+		return
 	}
 
+	// send it!
 	w.Header().Set("Content-Type", "image/png")
 	w.Header().Set("Content-Length", strconv.Itoa(len(buffer.Bytes())))
 	if _, err := w.Write(buffer.Bytes()); err != nil {
