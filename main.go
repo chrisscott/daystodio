@@ -144,8 +144,10 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{days:[0-9]{1,4}(?:\\.png)?}", imageHandler)
-	r.HandleFunc("/{date:\\d{4}\\-\\d{2}\\-\\d{2}(?:\\.png)?}", imageHandler)
+	r.HandleFunc("/{days:[0-9]{1,4}}", imageHandler)
+	r.HandleFunc("/{days:[0-9]{1,4}}.png", imageHandler)
+	r.HandleFunc("/{date:\\d{4}\\-\\d{2}\\-\\d{2}}", imageHandler)
+	r.HandleFunc("/{date:\\d{4}\\-\\d{2}\\-\\d{2}}.png", imageHandler)
 	http.Handle("/", r)
 
 	log.Printf("Listening on http://0.0.0.0:%v...\n", os.Getenv("PORT"))
